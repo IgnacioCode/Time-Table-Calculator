@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="451.0" prefWidth="707.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <TableView fx:id="daysTable" editable="true" layoutX="35.0" layoutY="130.0" prefHeight="240.0" prefWidth="642.0">
+        <columns>
+          <TableColumn fx:id="monday" maxWidth="107.0" minWidth="107.0" prefWidth="107.0" resizable="false" sortable="false" text="Monday" />
+          <TableColumn fx:id="tuesday" maxWidth="107.0" minWidth="107.0" prefWidth="107.0" resizable="false" sortable="false" text="Tuesday" />
+            <TableColumn fx:id="wednesday" maxWidth="107.0" minWidth="107.0" prefWidth="107.0" resizable="false" sortable="false" text="Wednesday" />
+            <TableColumn fx:id="thursday" maxWidth="107.0" minWidth="107.0" prefWidth="107.0" resizable="false" sortable="false" text="Thursday" />
+            <TableColumn fx:id="friday" maxWidth="107.0" minWidth="107.0" prefWidth="107.0" resizable="false" sortable="false" text="Friday" />
+            <TableColumn fx:id="saturday" maxWidth="107.0" minWidth="107.0" prefWidth="107.0" resizable="false" sortable="false" text="Saturday" />
+        </columns>
+      </TableView>
+      <Text layoutX="35.0" layoutY="78.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Write the section number on each slot for each different section for this subject. If there's more than one section in one slot, separate them with &quot;,&quot;" wrappingWidth="586.984375" />
+      <Button fx:id="completeButton" layoutX="35.0" layoutY="389.0" mnemonicParsing="false" onAction="#saveNewSubject" prefHeight="25.0" prefWidth="82.0" text="Complete" />
+      <Text layoutX="35.0" layoutY="117.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Ej.: &quot;1,2,4,5&quot;" />
+      <Label fx:id="subjectNameTitle" layoutX="35.0" layoutY="22.0" prefHeight="38.0" prefWidth="423.0" text="Subject" textFill="#a4a4a4">
+         <font>
+            <Font size="26.0" />
+         </font>
+      </Label>
+   </children>
+</Pane>
