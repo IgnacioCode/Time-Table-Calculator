@@ -3,10 +3,13 @@ package timetable;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.awt.Desktop;
 
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -25,6 +28,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -37,6 +41,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.stage.FileChooser;
 
 public class Controller implements Initializable{
 	
@@ -48,10 +53,11 @@ public class Controller implements Initializable{
 	private static final double HBOX_HEIGHT = 28;
 	private static final double EDIT_BUTTON_HEIGHT = 41;
 	private static final double EDIT_BUTTON_WIDTH = 62;
-	private static final String SUBJECT_SAVE_FILE = "subjectFile.json";
+	private static String SUBJECT_SAVE_FILE = "subjectFile.json";
 	private static final String SUBJECT_CREATION_WINDOW = "subjectCreationWindow.fxml";
 	private static final String MAIN_WINDOW = "mainWindow.fxml";
 	private static final String RESULTS_WINDOW = "resultsWindow.fxml";
+	private static final String ABOUT_WINDOW = "infoWindow.fxml";
 	private Stage currentStage;
 	private Scene currentScene;
 	
@@ -68,6 +74,8 @@ public class Controller implements Initializable{
 	@FXML
 	Label pageNumberLabel = new Label();
 	@FXML
+	Label combNumberLabel = new Label();
+	@FXML
 	TableView<WeekRow> daysTable = new TableView<>();
 	@FXML
 	AnchorPane leftMainPanel = new AnchorPane();
@@ -77,6 +85,12 @@ public class Controller implements Initializable{
 	VBox leftVBox = new VBox();
 	@FXML
 	VBox rightVBox = new VBox();
+	@FXML
+	MenuItem changeFileButton = new MenuItem();
+	@FXML
+	MenuItem saveFileButton = new MenuItem();
+	@FXML
+	MenuItem aboutButton = new MenuItem();
 	
 	@FXML
 	TableColumn<WeekRow,String> monday = new TableColumn<WeekRow,String>();
@@ -110,6 +124,8 @@ public class Controller implements Initializable{
 	
 	Stage resultsStage;
 	Scene resultsScene;
+	Stage helpStage;
+	Scene helpScene;
 	
 	ObservableList<WeekRow> data = FXCollections.observableArrayList(
     		new WeekRow("Morning"),
@@ -143,7 +159,7 @@ public class Controller implements Initializable{
 		if(subjects.isEmpty())
 			return;
 		
-		resultsList = Timetable.calculateTimeTables(subjects);
+		//resultsList = Timetable.calculateTimeTables(subjects);
 		
 		System.out.println(resultsList.size()+" Options");
 		
@@ -212,6 +228,7 @@ public class Controller implements Initializable{
 		
 		rightVBox.getChildren().add(HBoxToMove);
 		leftVBox.getChildren().remove(HBoxToMove);
+		updateCombinationsText();
 		currentStage.show();
 	}
 	
@@ -220,6 +237,7 @@ public class Controller implements Initializable{
 		File subjectSaveFile = new File(SUBJECT_SAVE_FILE);
 		ObjectMapper objectMapper = new ObjectMapper();
 		List<Subject> subjects = new LinkedList<Subject>();
+		boolean leftDelete = false;
 		
 		try {
 			subjects = objectMapper.readValue(subjectSaveFile, new TypeReference<List<Subject>>(){});
@@ -237,18 +255,31 @@ public class Controller implements Initializable{
 		
 		for (Iterator<Subject> iterator = subjects.iterator(); iterator.hasNext();) {
 			Subject subject = (Subject) iterator.next();
+			
+			if(subject.waiting)
+				leftDelete = true;
+			
 			if(subject.name.equals(subjectToDelete))
 				iterator.remove();
 			
 		}
 		
-		leftVBox.getChildren().remove(HBoxToDelete);
+		if(leftDelete)
+			leftVBox.getChildren().remove(HBoxToDelete);
+		else
+			rightVBox.getChildren().remove(HBoxToDelete);
+		
 		try {
 			objectMapper.writeValue(subjectSaveFile, subjects);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
 		
+		try {
+			loadRightSubjectVBox();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 		currentStage.show();
 	}
 	
@@ -303,6 +334,8 @@ public class Controller implements Initializable{
 		
 		leftVBox.getChildren().add(HBoxToMove);
 		rightVBox.getChildren().remove(HBoxToMove);
+		
+		updateCombinationsText();
 		currentStage.show();
 	}
 	
@@ -514,18 +547,106 @@ public class Controller implements Initializable{
 		currentScene = new Scene(root);
 		currentStage.setScene(currentScene);
 		currentStage.setTitle(windowTitle);
+		currentStage.setResizable(false);
 		
 		loadRightSubjectVBox();
 		
 	}
-	
-	
 	
 	@Override
 	//Method call for every loader.load() 
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		
 	}
+	
+	@FXML
+	private void changeSaveFile(ActionEvent e) throws StreamReadException, DatabindException, IOException {
+		FileChooser fileChooser = new FileChooser();
+
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("JSON File (*.json)", "*.json");
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        File selectedFile = fileChooser.showOpenDialog(currentStage);
+        
+        if (selectedFile != null) {
+            // Accede al archivo seleccionado aquí
+            SUBJECT_SAVE_FILE = selectedFile.getAbsolutePath();
+            loadRightSubjectVBox();
+            updateCombinationsText();
+        }
+	}
+	
+	@FXML
+	private void createNewSaveFile(ActionEvent e){
+		FileChooser fileChooser = new FileChooser();
+
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("JSON File (*.json)", "*.json");
+        fileChooser.getExtensionFilters().add(extFilter);
+        
+        File selectedFile = fileChooser.showSaveDialog(currentStage);
+
+        if (selectedFile != null) {
+            // Accede al archivo seleccionado aquí
+        	System.out.println("Archivo guardado en: " + selectedFile.getAbsolutePath());
+            SUBJECT_SAVE_FILE = selectedFile.getAbsolutePath();
+        }
+	}
+	
+	@FXML
+	private void showAboutScreen(ActionEvent e) {
+		
+		loader = new FXMLLoader(getClass().getResource(ABOUT_WINDOW));
+		loader.setController(this);
+		Pane root = null;
+		try {
+			root = loader.load();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
+		helpStage = new Stage();
+		helpScene = new Scene(root);
+		helpStage.setScene(helpScene);
+		
+		
+		helpStage.setTitle("About Time Table Calculator");
+		helpStage.setResizable(false);
+		helpStage.show();
+		
+	}
+	
+	@FXML
+	private void openBrowser(ActionEvent ev) {
+		String url = "https://github.com/IgnacioCode"; // Reemplaza con el enlace que desees abrir
+		System.out.println("ENTRE");
+        try {
+            Desktop.getDesktop().browse(new URI(url));
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+	}
+	
+	private void updateCombinationsText() {
+		List<Subject> subjects = loadSaveFile();
+		for (Iterator<Subject> it = subjects.iterator(); it.hasNext();) {
+			Subject subject = (Subject) it.next();
+			if(subject.waiting)
+				it.remove();
+		}
+		
+		if(subjects.isEmpty()){
+			combNumberLabel.setText("No combinations");
+			return;
+		}
+		
+		resultsList = Timetable.calculateTimeTables(subjects);
+		int cantResults = resultsList.size();
+		if(cantResults!=0)
+			combNumberLabel.setText(cantResults + " Combinations");
+		else
+			combNumberLabel.setText("No combinations");
+		currentStage.show();
+	} 
 
 	private void setUpTable(Timetable timetable, TableView<WeekRow> tableView) {
 		
@@ -614,6 +735,10 @@ public class Controller implements Initializable{
 		
 		List<Subject> subjects = loadSaveFile();
 		
+		leftVBox.getChildren().clear();
+		rightVBox.getChildren().clear();
+		
+		
 		for (Subject subject : subjects) {
 			
 			HBox newSubjectHBox = new HBox();
@@ -666,6 +791,8 @@ public class Controller implements Initializable{
 			}
 			
 		}
+		
+		updateCombinationsText();
 		
 		currentStage.show();
 	}
