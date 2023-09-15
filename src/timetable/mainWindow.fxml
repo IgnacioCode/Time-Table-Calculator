@@ -52,10 +52,16 @@
       <menus>
         <Menu mnemonicParsing="false" text="File">
           <items>
-            <MenuItem id="changeFileButton" mnemonicParsing="false" onAction="#changeSaveFile" text="Change subjects file..." />
-                  <MenuItem id="saveFileButton" mnemonicParsing="false" onAction="#createNewSaveFile" text="Save subjects file as..." />
+                  <MenuItem mnemonicParsing="false" onAction="#createSaveFile" text="New subjects file..." />
+            <MenuItem id="changeFileButton" mnemonicParsing="false" onAction="#changeSaveFile" text="Open subjects file..." />
+                  <MenuItem id="saveFileButton" mnemonicParsing="false" onAction="#saveSubjectFile" text="Save subjects file as..." />
           </items>
         </Menu>
+            <Menu mnemonicParsing="false" text="Options">
+              <items>
+                <MenuItem mnemonicParsing="false" onAction="#openLanguageWindow" text="Change language" />
+              </items>
+            </Menu>
         <Menu mnemonicParsing="false" text="Help">
           <items>
             <MenuItem fx:id="aboutButton" mnemonicParsing="false" onAction="#showAboutScreen" text="About" />
@@ -76,7 +82,7 @@
               </textFill>
             </Label>
                   <Button id="addButton" layoutX="90.0" layoutY="11.0" mnemonicParsing="false" onAction="#addSubject" text="Add" />
-                  <VBox fx:id="leftVBox" layoutX="14.0" layoutY="47.0" prefHeight="314.0" prefWidth="404.0" />
+                  <VBox fx:id="leftVBox" layoutX="14.0" layoutY="50.0" prefHeight="314.0" prefWidth="404.0" />
           </children>
         </AnchorPane>
             <AnchorPane id="rightVBox" fx:id="rightMainPanel" prefHeight="200.0" prefWidth="273.0">

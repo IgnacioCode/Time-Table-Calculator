@@ -1,8 +1,11 @@
 package timetable;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.channels.FileChannel;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
@@ -34,6 +37,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -58,6 +62,7 @@ public class Controller implements Initializable{
 	private static final String MAIN_WINDOW = "mainWindow.fxml";
 	private static final String RESULTS_WINDOW = "resultsWindow.fxml";
 	private static final String ABOUT_WINDOW = "infoWindow.fxml";
+	private static final String LANGUAGE_WINDOW = "languageOption.fxml";
 	private Stage currentStage;
 	private Scene currentScene;
 	
@@ -126,6 +131,9 @@ public class Controller implements Initializable{
 	Scene resultsScene;
 	Stage helpStage;
 	Scene helpScene;
+	Stage languageStage;
+	Scene languageScene;
+	
 	
 	ObservableList<WeekRow> data = FXCollections.observableArrayList(
     		new WeekRow("Morning"),
@@ -157,9 +165,6 @@ public class Controller implements Initializable{
 		}
 		
 		if(subjects.isEmpty())
-			return;
-		
-		//resultsList = Timetable.calculateTimeTables(subjects);
 		
 		System.out.println(resultsList.size()+" Options");
 		
@@ -196,9 +201,8 @@ public class Controller implements Initializable{
 			
 		}
 		
-		
-		
 		resultsStage.setResizable(false);
+		resultsStage.getIcons().add(new Image(getClass().getResourceAsStream("icon2.png")));
 		resultsStage.show();
 	}
 	
@@ -418,7 +422,6 @@ public class Controller implements Initializable{
         currentStage.show();
         
 	}
-
 	
 	@FXML
 	public void saveNewSubject(ActionEvent e) throws IOException {
@@ -534,8 +537,9 @@ public class Controller implements Initializable{
         currentScene = new Scene(root);
         currentStage.setScene(currentScene);
         currentStage.setTitle(windowTitle);
+        currentStage.getIcons().add(new Image(getClass().getResourceAsStream("icon2.png")));
         
-        loadRightSubjectVBox();
+        loadRightSubjectVBox(); 
 	}
 
 	public void changeScene(String fileName, String windowTitle) throws IOException {
@@ -547,6 +551,7 @@ public class Controller implements Initializable{
 		currentScene = new Scene(root);
 		currentStage.setScene(currentScene);
 		currentStage.setTitle(windowTitle);
+		currentStage.getIcons().add(new Image(getClass().getResourceAsStream("icon2.png")));
 		currentStage.setResizable(false);
 		
 		loadRightSubjectVBox();
@@ -557,6 +562,20 @@ public class Controller implements Initializable{
 	//Method call for every loader.load() 
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		
+	}
+	
+	@FXML
+	private void createSaveFile(ActionEvent e) throws StreamReadException, DatabindException, IOException {
+		FileChooser fileChooser = new FileChooser();
+
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("JSON File (*.json)", "*.json");
+        fileChooser.getExtensionFilters().add(extFilter);
+        
+        File selectedFile = fileChooser.showSaveDialog(currentStage);
+        selectedFile.createNewFile();
+        SUBJECT_SAVE_FILE = selectedFile.getAbsolutePath();
+        
+        loadRightSubjectVBox();
 	}
 	
 	@FXML
@@ -572,24 +591,49 @@ public class Controller implements Initializable{
             // Accede al archivo seleccionado aquí
             SUBJECT_SAVE_FILE = selectedFile.getAbsolutePath();
             loadRightSubjectVBox();
-            updateCombinationsText();
         }
 	}
 	
 	@FXML
-	private void createNewSaveFile(ActionEvent e){
+	private void saveSubjectFile(ActionEvent e) throws IOException{
 		FileChooser fileChooser = new FileChooser();
 
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("JSON File (*.json)", "*.json");
         fileChooser.getExtensionFilters().add(extFilter);
         
         File selectedFile = fileChooser.showSaveDialog(currentStage);
+        
+        File subjectFile = new File(SUBJECT_SAVE_FILE);
+        copyFileUsingFileChannels(subjectFile, selectedFile);
 
         if (selectedFile != null) {
-            // Accede al archivo seleccionado aquí
         	System.out.println("Archivo guardado en: " + selectedFile.getAbsolutePath());
             SUBJECT_SAVE_FILE = selectedFile.getAbsolutePath();
         }
+	}
+	
+	@FXML
+	private void openLanguageWindow(ActionEvent e) {
+		loader = new FXMLLoader(getClass().getResource(LANGUAGE_WINDOW));
+		loader.setController(this);
+		Pane root = null;
+		try {
+			root = loader.load();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		if(languageStage != null)
+			languageStage.close();
+		
+		languageStage = new Stage();
+		languageScene = new Scene(root);
+		languageStage.setScene(languageScene);
+		
+		languageStage.setTitle("Change Language");
+		languageStage.setResizable(false);
+		languageStage.getIcons().add(new Image(getClass().getResourceAsStream("icon2.png")));
+		
+		languageStage.show();
 	}
 	
 	@FXML
@@ -608,17 +652,17 @@ public class Controller implements Initializable{
 		helpScene = new Scene(root);
 		helpStage.setScene(helpScene);
 		
-		
 		helpStage.setTitle("About Time Table Calculator");
 		helpStage.setResizable(false);
+		helpStage.getIcons().add(new Image(getClass().getResourceAsStream("icon2.png")));
 		helpStage.show();
 		
 	}
 	
 	@FXML
 	private void openBrowser(ActionEvent ev) {
-		String url = "https://github.com/IgnacioCode"; // Reemplaza con el enlace que desees abrir
-		System.out.println("ENTRE");
+		String url="https://github.com/IgnacioCode";
+		
         try {
             Desktop.getDesktop().browse(new URI(url));
         } catch (IOException | URISyntaxException e) {
@@ -657,6 +701,8 @@ public class Controller implements Initializable{
 	    		);
 		
 		ObservableList<TableColumn<WeekRow,?>> collumns = tableView.getColumns();
+		
+		tableView.getColumns().forEach(column -> column.setReorderable(false));
 		
 		collumns.get(0).setCellValueFactory(new PropertyValueFactory<>("monday"));
 		collumns.get(1).setCellValueFactory(new PropertyValueFactory<>("tuesday"));
@@ -709,7 +755,6 @@ public class Controller implements Initializable{
 			}
 			
 		}
-		
 		
 		tableView.setFixedCellSize(58);
 		
@@ -951,6 +996,37 @@ public class Controller implements Initializable{
 			e.printStackTrace();
 		}
 	}
+	
+	private static void copyFileUsingFileChannels(File sourceFile, File destFile) throws IOException {
+        FileInputStream inputStream = null;
+        FileOutputStream outputStream = null;
+        FileChannel sourceChannel = null;
+        FileChannel destChannel = null;
+
+        try {
+            inputStream = new FileInputStream(sourceFile);
+            outputStream = new FileOutputStream(destFile);
+            sourceChannel = inputStream.getChannel();
+            destChannel = outputStream.getChannel();
+
+            // Copiar el archivo
+            destChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
+        } finally {
+            // Cerrar canales y flujos
+            if (sourceChannel != null) {
+                sourceChannel.close();
+            }
+            if (destChannel != null) {
+                destChannel.close();
+            }
+            if (inputStream != null) {
+                inputStream.close();
+            }
+            if (outputStream != null) {
+                outputStream.close();
+            }
+        }
+    }
 	
 	private String dayNumber(int j) {
 		String[] diasSemana = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="130.0" prefWidth="281.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Text layoutX="14.0" layoutY="73.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Language" textAlignment="CENTER">
+         <font>
+            <Font size="23.0" />
+         </font>
+      </Text>
+      <MenuButton layoutX="141.0" layoutY="53.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="122.0" text="English">
+        <items>
+          <MenuItem mnemonicParsing="false" text="English" />
+          <MenuItem mnemonicParsing="false" text="Español" />
+        </items>
+      </MenuButton>
+   </children>
+</Pane>
